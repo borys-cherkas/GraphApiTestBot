@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace GraphApiTestBot.State
+﻿namespace GraphApiTestBot.State
 {
     public class TokenState
     {
-        public TokenState()
-        {
-            
-        }
-
-        public TokenState(string accessToken)
+        public TokenState(string accessToken = null)
         {
             AccessToken = accessToken;
         }

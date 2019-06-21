@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Graph;
 
@@ -25,20 +26,20 @@ namespace GraphApiTestBot.Extensions
         }
 
         // Get information about the user.
-        public async Task<User> GetMeAsync()
+        public async Task<User> GetMeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             var graphClient = GetAuthenticatedClient();
-            var me = await graphClient.Me.Request().GetAsync();
+            var me = await graphClient.Me.Request().GetAsync(cancellationToken);
             return me;
         }
 
-        public async Task<IDriveItemChildrenCollectionPage> GetMicrosoftGraphOneDriveFilesAsync()
+        public async Task<IDriveItemChildrenCollectionPage> GetMicrosoftGraphOneDriveFilesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             var graphClient = GetAuthenticatedClient();
 
             var driveResponse = await graphClient.Me.Drive.Root.Children
                 .Request()
-                .GetAsync();
+                .GetAsync(cancellationToken);
 
             return driveResponse;
         }

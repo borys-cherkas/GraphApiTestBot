@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphApiTestBot.Extensions;
+using GraphApiTestBot.State;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -14,16 +17,21 @@ namespace GraphApiTestBot.Dialogs
         private const string ProfileInfoCommand = "profile info";
         private const string ListOneDriveItemsCommand = "list onedrive items";
 
+        private readonly List<string> SignInRequiredCommands = new List<string> { ProfileInfoCommand, ListOneDriveItemsCommand };
+
         public TopLevelDialog(IConfiguration configuration, UserState userState, ConversationState conversationState) 
             : base(nameof(TopLevelDialog))
         {
             AddDialog(new TextPrompt(nameof(TextPrompt)));
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
+            AddDialog(new SignInDialog(configuration));
 
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
             {
                 OpenActionChooserAsync,
+                OpenSignInDialogAsync,
+                HandleSignInResultAsync,
                 ExecuteChosenActionAsync,
                 AskSomethingMoreAsync,
                 HandleSomethingMoreQuestingAsync
@@ -38,42 +46,77 @@ namespace GraphApiTestBot.Dialogs
                 new PromptOptions
                 {
                     Prompt = MessageFactory.Text("Would you like to do?"),
+                    RetryPrompt = MessageFactory.Text("There's no such option. Please, choose one from suggested list."),
                     Choices = ChoiceFactory.ToChoices(new List<string> { HelpCommand, ProfileInfoCommand, ListOneDriveItemsCommand }),
                 }, cancellationToken);
         }
 
+        private async Task<DialogTurnResult> OpenSignInDialogAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var command = ((FoundChoice)stepContext.Result).Value;
+            stepContext.Values["command"] = command;
+
+            if (!SignInRequiredCommands.Contains(command))
+            {
+                return await stepContext.ContinueDialogAsync(cancellationToken: cancellationToken);
+            }
+
+            return await stepContext.BeginDialogAsync(nameof(SignInDialog), null, cancellationToken);
+        }
+
+        private async Task<DialogTurnResult> HandleSignInResultAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var command = (string) stepContext.Values["command"];
+            if (SignInRequiredCommands.Contains(command))
+            {
+                var accessTokenState = (TokenState)stepContext.Result;
+                stepContext.Values["accessToken"] = accessTokenState;
+            }
+
+            return await stepContext.ContinueDialogAsync(cancellationToken: cancellationToken);
+        }
+
         private async Task<DialogTurnResult> ExecuteChosenActionAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var message = ((FoundChoice)stepContext.Result).Value;
+            var message = (string)stepContext.Result;
 
             switch (message.ToLower().Trim())
             {
                 case HelpCommand:
                 {
-                    // TODO: Create and show Help card here 
-                    await stepContext.Context.SendActivityAsync("Help information here...", cancellationToken: cancellationToken);
+                    await ShowHelpCardAsync(stepContext, cancellationToken);
                     break;
                 }
                 case ProfileInfoCommand:
                 {
-                    // TODO: Create and show profile info card here 
-                    await stepContext.Context.SendActivityAsync("Profile info here...", cancellationToken: cancellationToken);
+                    await LoadAndShowProfileInfoAsync(stepContext, cancellationToken);
                     break;
                 }
                 case ListOneDriveItemsCommand:
                 {
-                    // TODO: Create and show list one drive files card here 
-                    await stepContext.Context.SendActivityAsync("One drive files here...", cancellationToken: cancellationToken);
-                    break;
-                }
-                default:
-                {
-                    await stepContext.Context.SendActivityAsync("Unknown command...", cancellationToken: cancellationToken);
+                    await LoadAndShowOneDriveItemsAsync(stepContext, cancellationToken);
                     break;
                 }
             }
 
             return await stepContext.ContinueDialogAsync(cancellationToken: cancellationToken);
+        }
+
+        private async Task ShowHelpCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            await stepContext.Context.SendActivityAsync("Help information here...", cancellationToken: cancellationToken);
+        }
+
+        private async Task LoadAndShowProfileInfoAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var tokenState = (TokenState)stepContext.Values["accessToken"];
+
+            await OAuthHelpers.ShowMyProfileInfoAsync(stepContext.Context, tokenState, cancellationToken);
+        }
+
+        private async Task LoadAndShowOneDriveItemsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            await stepContext.Context.SendActivityAsync("One drive files here...", cancellationToken: cancellationToken);
         }
 
         private async Task<DialogTurnResult> AskSomethingMoreAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)

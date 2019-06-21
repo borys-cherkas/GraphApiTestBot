@@ -31,7 +31,8 @@ namespace GraphApiTestBot.Dialogs
 
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            await stepContext.Context.SendActivityAsync("Thank you for using Graph API bot.", cancellationToken: cancellationToken);
+            await stepContext.Context.SendActivityAsync("Thank you for using Graph API bot. " +
+                "If you want to continue working with the bot, just send any message.", cancellationToken: cancellationToken);
             
             return await stepContext.EndDialogAsync(null, cancellationToken);
         }

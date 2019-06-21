@@ -49,9 +49,9 @@ namespace GraphApiTestBot
             services.AddSingleton<ConversationState>();
 
             // The Dialog that will be run by the bot.
-            services.AddTransient<MainDialog>();
-            services.AddTransient<TopLevelDialog>();
-            services.AddTransient<SignInDialog>();
+            services.AddSingleton<MainDialog>();
+            services.AddSingleton<TopLevelDialog>();
+            services.AddSingleton<SignInDialog>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddBot<DialogAndWelcomeBot<MainDialog>>(options =>
