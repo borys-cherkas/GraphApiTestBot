@@ -34,9 +34,23 @@ namespace GraphApiTestBot.Extensions
             await turnContext.SendActivityAsync($"You are {me.DisplayName}.");
         }
 
-        public static async Task ShowFilesAsync(ITurnContext stepContextContext, TokenResponse tokenResponse)
+        public static async Task ShowFilesAsync(ITurnContext turnContext, TokenResponse tokenResponse)
         {
-            throw new NotImplementedException();
+            if (turnContext == null)
+            {
+                throw new ArgumentNullException(nameof(turnContext));
+            }
+
+            if (tokenResponse == null)
+            {
+                throw new ArgumentNullException(nameof(tokenResponse));
+            }
+
+            // Pull in the data from the Microsoft Graph.
+            var client = new SimpleGraphClient(tokenResponse.Token);
+            var me = await client.GetMicrosoftGraphOneDriveFilesAsync();
+
+            await turnContext.SendActivityAsync($"OneDrive items count: {me.Count}.");
         }
     }
 }

@@ -32,6 +32,17 @@ namespace GraphApiTestBot.Extensions
             return me;
         }
 
+        public async Task<IDriveItemChildrenCollectionPage> GetMicrosoftGraphOneDriveFilesAsync()
+        {
+            var graphClient = GetAuthenticatedClient();
+
+            var driveResponse = await graphClient.Me.Drive.Root.Children
+                .Request()
+                .GetAsync();
+
+            return driveResponse;
+        }
+
         // Get an Authenticated Microsoft Graph client using the token issued to the user.
         private GraphServiceClient GetAuthenticatedClient()
         {
