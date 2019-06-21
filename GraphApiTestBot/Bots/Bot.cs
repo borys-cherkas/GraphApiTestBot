@@ -3,43 +3,78 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.3.0
 
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphApiTestBot.Extensions;
+using GraphApiTestBot.Middleware;
+using GraphApiTestBot.Storage;
 using Microsoft.Bot.Builder;
-using Microsoft.Bot.Builder.Teams;
-using Microsoft.Bot.Connector.Teams;
 using Microsoft.Bot.Schema;
+using Microsoft.Graph;
 
 namespace GraphApiTestBot.Bots
 {
     public class Bot : ActivityHandler
     {
+        private const string HelpCommand = "help";
+        private const string ListFilesCommand = "list all files";
+        
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            await turnContext.SendActivityAsync(MessageFactory.Text($"Borys CD Echo: {turnContext.Activity.Text}"), cancellationToken);
+            //await turnContext.SendActivityAsync(MessageFactory.Text($"Borys CD Echo: {turnContext.Activity.Text}"), cancellationToken);
+            var dialogInput = turnContext.Activity.Text?.Trim();
+            if (string.IsNullOrEmpty(dialogInput))
+            {
+                await turnContext.SendActivityAsync($"Hello! Use one from commands listed below to start dialog.");
+                await turnContext.SendActivityAsync($"['help', 'list all files']");
+            }
+            else if (dialogInput.Equals(HelpCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                await ShowHelpDialogAsync(turnContext, cancellationToken);
+            }
+            else if (dialogInput.Equals(ListFilesCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                await ShowListFilesDialogAsync(turnContext, cancellationToken);
+            }
         }
 
-        public override async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default)
+        private async Task ShowHelpDialogAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            await base.OnTurnAsync(turnContext, cancellationToken);
+            await turnContext.SendActivityAsync($"Available commands are only ones from the following set:");
+            await turnContext.SendActivityAsync($"Help");
+            await turnContext.SendActivityAsync($"List all files");
+        }
 
-            var teamsContext = turnContext.TurnState.Get<ITeamsContext>();
+        private async Task ShowListFilesDialogAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+        {
+            await turnContext.SendActivityAsync($"Showing files here...");
+            var tokenState = turnContext.TurnState.Get<ConversationAuthToken>(AzureAdAuthMiddleware.AuthTokenKey);
+            try
+            {
+                var oneDriveItems = await MicrosoftGraphExtensions.GetMicrosoftGraphOneDriveFilesAsync(tokenState.AccessToken);
+                StringBuilder sb = new StringBuilder("OneDrive stores such items: ");
+                int counter = 1;
+                foreach (var oneDriveItem in oneDriveItems)
+                {
+                    sb.AppendLine($"{counter++}: {oneDriveItem.Name} <{GetFileType(oneDriveItem)}>");
+                }
 
-            if (teamsContext == null) return;
+                await turnContext.SendActivityAsync(sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                await turnContext.SendActivityAsync($"Some error has been occured. {ex.Message}");
+            }
+        }
 
-            // Now fetch the Team ID, Channel ID, and Tenant ID off of the incoming activity
-            var incomingTeamId = teamsContext.Team.Id;
-            var incomingChannelid = teamsContext.Channel.Id;
-            var incomingTenantId = teamsContext.Tenant.Id;
-
-            // Make an operation call to fetch the list of channels in the team, and print count of channels.
-            var channels = await teamsContext.Operations.FetchChannelListAsync(incomingTeamId);
-            await turnContext.SendActivityAsync($"You have {channels.Conversations.Count} channels in this team");
-
-            // Make an operation call to fetch details of the team where the activity was posted, and print it.
-            var teamInfo = await teamsContext.Operations.FetchTeamDetailsAsync(incomingTeamId);
-            await turnContext.SendActivityAsync($"Name of this team is {teamInfo.Name} and group-id is {teamInfo.AadGroupId}");
+        private object GetFileType(DriveItem oneDriveItem)
+        {
+            if (oneDriveItem.File != null) return "file";
+            if (oneDriveItem.Folder != null) return "file";
+            return "unknown";
         }
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
@@ -51,6 +86,11 @@ namespace GraphApiTestBot.Bots
                     await turnContext.SendActivityAsync(MessageFactory.Text($"Hello and Welcome!"), cancellationToken);
                 }
             }
+        }
+
+        public override async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default)
+        {
+            await base.OnTurnAsync(turnContext, cancellationToken);
         }
     }
 }

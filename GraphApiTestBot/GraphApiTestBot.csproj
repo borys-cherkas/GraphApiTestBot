@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.4.5" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.4.5" />
     <PackageReference Include="Microsoft.Bot.Builder.Teams" Version="4.0.0-beta1" />
+    <PackageReference Include="Microsoft.Graph" Version="1.15.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +35,10 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Resource.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Bots\Dialogs\" />
     </ItemGroup>
 
 </Project>

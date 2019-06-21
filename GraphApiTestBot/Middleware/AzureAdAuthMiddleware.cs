@@ -18,7 +18,7 @@ namespace GraphApiTestBot.Middleware
 {
     public class AzureAdAuthMiddleware : IMiddleware
     {
-        private const string AuthTokenKey = "authToken";
+        public const string AuthTokenKey = "authToken";
         
         public AzureAdAuthMiddleware(IAuthTokenStorage tokenStorage, IConfiguration configuration)
         {
