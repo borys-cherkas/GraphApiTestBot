@@ -11,10 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using GraphApiTestBot.Bots;
 using Microsoft.AspNetCore.Mvc;
-using GraphApiTestBot.Storage;
 using GraphApiTestBot.Middleware;
 using Microsoft.Bot.Builder;
-using Microsoft.Bot.Connector.Authentication;
 using GraphApiTestBot.Dialogs;
 
 namespace GraphApiTestBot
@@ -38,9 +36,6 @@ namespace GraphApiTestBot
 
             services.AddSingleton(Configuration);
 
-            // Create the credential provider to be used with the Bot Framework Adapter.
-            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
-
             // Create the Bot Framework Adapter with error handling enabled. 
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
@@ -54,10 +49,12 @@ namespace GraphApiTestBot
             services.AddSingleton<ConversationState>();
 
             // The Dialog that will be run by the bot.
-            services.AddSingleton<MainDialog>();
+            services.AddTransient<MainDialog>();
+            services.AddTransient<TopLevelDialog>();
+            services.AddTransient<SignInDialog>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
-            services.AddBot<AuthBot<MainDialog>>(options =>
+            services.AddBot<DialogAndWelcomeBot<MainDialog>>(options =>
             {
                 options.CredentialProvider = new ConfigurationCredentialProvider(Configuration);
 
@@ -72,16 +69,8 @@ namespace GraphApiTestBot
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseHsts();
-            }
 
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
-
-            //app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseBotFramework();
         }
     }
 }

@@ -14,26 +14,10 @@
     <PackageReference Include="Microsoft.Graph" Version="1.15.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resource.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
     <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Update="Resource.resx">
-        <SubType>Designer</SubType>
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Resource.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-    </ItemGroup>
 
 </Project>
