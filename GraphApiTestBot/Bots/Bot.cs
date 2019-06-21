@@ -13,7 +13,7 @@ using Microsoft.Bot.Schema;
 
 namespace GraphApiTestBot.Bots
 {
-    public class EchoBot : ActivityHandler
+    public class Bot : ActivityHandler
     {
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {

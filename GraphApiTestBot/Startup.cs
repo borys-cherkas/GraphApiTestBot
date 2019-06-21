@@ -5,39 +5,52 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
-using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using GraphApiTestBot.Bots;
+using Microsoft.AspNetCore.Mvc;
+using GraphApiTestBot.Storage;
+using GraphApiTestBot.Middleware;
 
 namespace GraphApiTestBot
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
+
+        private IHostingEnvironment Env { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddSingleton(Configuration);
 
-            // Create the credential provider to be used with the Bot Framework Adapter.
-            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            //// Only need a single storage instance unless you really are storing your conversation state and user state in two completely DB instances
+            //var storage = new CosmosDbStorage(new CosmosDbStorageOptions
+            //{
+            //    // … set options here …
+            //});
 
-            // Create the Bot Framework Adapter.
-            services.AddSingleton<IBotFrameworkHttpAdapter, BotFrameworkHttpAdapter>();
+            // do not use in memory storage for production!
+            var authTokenStorage = new InMemoryAuthTokenStorage();
+            services.AddSingleton<IAuthTokenStorage>(authTokenStorage);
 
-            // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
-            services.AddTransient<IBot, EchoBot>();
+            services.AddBot<Bot>((options) => {
+                options.CredentialProvider = new ConfigurationCredentialProvider(Configuration);
+
+                // add azure ad auth middleware to get an authorization token to use to connect to Office 365 Graph
+                options.Middleware.Add(new AzureAdAuthMiddleware(authTokenStorage, Configuration));
+            });
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,16 +60,9 @@ namespace GraphApiTestBot
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseHsts();
-            }
 
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
-
-            //app.UseHttpsRedirection();
             app.UseMvc();
+            app.UseBotFramework();
         }
     }
 }
