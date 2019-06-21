@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JamesMann.BotFramework.Dialogs" Version="1.1.2018816.2" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Bot.Builder.Azure" Version="4.4.5" />
     <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.4.5" />
@@ -38,7 +37,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Bots\Dialogs\" />
+      <Folder Include="Dialogs\" />
     </ItemGroup>
 
 </Project>

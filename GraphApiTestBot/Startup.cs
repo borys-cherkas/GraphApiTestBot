@@ -13,6 +13,9 @@ using GraphApiTestBot.Bots;
 using Microsoft.AspNetCore.Mvc;
 using GraphApiTestBot.Storage;
 using GraphApiTestBot.Middleware;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Connector.Authentication;
+using GraphApiTestBot.Dialogs;
 
 namespace GraphApiTestBot
 {
@@ -31,26 +34,30 @@ namespace GraphApiTestBot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
             services.AddSingleton(Configuration);
 
-            //// Only need a single storage instance unless you really are storing your conversation state and user state in two completely DB instances
-            //var storage = new CosmosDbStorage(new CosmosDbStorageOptions
-            //{
-            //    // … set options here …
-            //});
+            // Create the credential provider to be used with the Bot Framework Adapter.
+            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
 
-            // do not use in memory storage for production!
-            var authTokenStorage = new InMemoryAuthTokenStorage();
-            services.AddSingleton<IAuthTokenStorage>(authTokenStorage);
+            // Create the Bot Framework Adapter with error handling enabled. 
+            services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
-            services.AddBot<Bot>((options) => {
-                options.CredentialProvider = new ConfigurationCredentialProvider(Configuration);
+            // Create the storage we'll be using for User and Conversation state. (Memory is great for testing purposes.) 
+            services.AddSingleton<IStorage, MemoryStorage>();
 
-                // add azure ad auth middleware to get an authorization token to use to connect to Office 365 Graph
-                options.Middleware.Add(new AzureAdAuthMiddleware(authTokenStorage, Configuration));
-            });
+            // Create the User state. (Used in this bot's Dialog implementation.)
+            services.AddSingleton<UserState>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // Create the Conversation state. (Used by the Dialog system itself.)
+            services.AddSingleton<ConversationState>();
+
+            // The Dialog that will be run by the bot.
+            services.AddSingleton<MainDialog>();
+
+            // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
+            services.AddTransient<IBot, AuthBot<MainDialog>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,9 +67,16 @@ namespace GraphApiTestBot
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
 
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
+            //app.UseHttpsRedirection();
             app.UseMvc();
-            app.UseBotFramework();
         }
     }
 }
