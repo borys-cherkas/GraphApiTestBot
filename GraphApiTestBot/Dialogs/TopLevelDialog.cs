@@ -73,7 +73,7 @@ namespace GraphApiTestBot.Dialogs
                 stepContext.Values["accessToken"] = accessTokenState;
             }
 
-            return await stepContext.ContinueDialogAsync(cancellationToken: cancellationToken);
+            return await stepContext.NextAsync(command, cancellationToken: cancellationToken);
         }
 
         private async Task<DialogTurnResult> ExecuteChosenActionAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -99,7 +99,7 @@ namespace GraphApiTestBot.Dialogs
                 }
             }
 
-            return await stepContext.ContinueDialogAsync(cancellationToken: cancellationToken);
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
 
         private async Task ShowHelpCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
