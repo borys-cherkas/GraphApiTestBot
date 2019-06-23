@@ -116,7 +116,9 @@ namespace GraphApiTestBot.Dialogs
 
         private async Task LoadAndShowOneDriveItemsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            await stepContext.Context.SendActivityAsync("One drive files here...", cancellationToken: cancellationToken);
+            var tokenState = (TokenState)stepContext.Values["accessToken"];
+
+            await OAuthHelpers.ShowFilesAsync(stepContext.Context, tokenState, cancellationToken);
         }
 
         private async Task<DialogTurnResult> AskSomethingMoreAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)

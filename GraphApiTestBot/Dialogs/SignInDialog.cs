@@ -14,12 +14,6 @@ namespace GraphApiTestBot.Dialogs
         {
             ConnectionName = configuration["ConnectionName"];
 
-            AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
-            {
-                ShowSignInCardAsync,
-                ValidateSignInResultAsync
-            }));
-
             AddDialog(new OAuthPrompt(
                 nameof(OAuthPrompt),
                 new OAuthPromptSettings
@@ -28,9 +22,18 @@ namespace GraphApiTestBot.Dialogs
                     Text = "Please login",
                     Title = "Login",
                     Timeout = 300000, // User has 5 minutes to login
+                    // Timeout = 20000, // User has 20 sec to login
                 }));
 
             AddDialog(new TextPrompt(nameof(TextPrompt)));
+
+            AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
+            {
+                ShowSignInCardAsync,
+                ValidateSignInResultAsync
+            }));
+
+            InitialDialogId = nameof(WaterfallDialog);
         }
 
         public string ConnectionName { get; }

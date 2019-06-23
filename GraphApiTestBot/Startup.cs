@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using GraphApiTestBot.Middleware;
 using Microsoft.Bot.Builder;
 using GraphApiTestBot.Dialogs;
+using Microsoft.Bot.Connector.Authentication;
 
 namespace GraphApiTestBot
 {
@@ -35,6 +36,9 @@ namespace GraphApiTestBot
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSingleton(Configuration);
+
+            // Create the credential provider to be used with the Bot Framework Adapter.
+            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
 
             // Create the Bot Framework Adapter with error handling enabled. 
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
@@ -69,8 +73,16 @@ namespace GraphApiTestBot
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
 
-            app.UseBotFramework();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
+            //app.UseHttpsRedirection();
+            app.UseMvc();
         }
     }
 }
