@@ -20,7 +20,7 @@ namespace GraphApiTestBot.Dialogs
     {
         private const string HelpCommand = "help";
         private const string ProfileInfoCommand = "profile info";
-        private const string ListOneDriveItemsCommand = "list my items";
+        private const string ListOneDriveItemsCommand = "list my files";
 
         private readonly List<string> _signInRequiredCommands = new List<string> { ProfileInfoCommand, ListOneDriveItemsCommand };
 

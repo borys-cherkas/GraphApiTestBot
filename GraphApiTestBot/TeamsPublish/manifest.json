@@ -42,7 +42,7 @@
               "description": "Shows all available commands in bot"
             },
             {
-              "title": "List my items",
+              "title": "List my files",
               "description": "Shows all files in your OneDrive"
             }
           ]
