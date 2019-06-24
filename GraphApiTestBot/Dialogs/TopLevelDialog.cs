@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphApiTestBot.CardsTemplates;
 using GraphApiTestBot.Extensions;
+using GraphApiTestBot.Graph;
 using GraphApiTestBot.State;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 
 namespace GraphApiTestBot.Dialogs
@@ -15,9 +18,9 @@ namespace GraphApiTestBot.Dialogs
     {
         private const string HelpCommand = "help";
         private const string ProfileInfoCommand = "profile info";
-        private const string ListOneDriveItemsCommand = "list onedrive items";
+        private const string ListOneDriveItemsCommand = "list my items";
 
-        private readonly List<string> SignInRequiredCommands = new List<string> { ProfileInfoCommand, ListOneDriveItemsCommand };
+        private readonly List<string> _signInRequiredCommands = new List<string> { ProfileInfoCommand, ListOneDriveItemsCommand };
 
         public TopLevelDialog(IConfiguration configuration, UserState userState, ConversationState conversationState) 
             : base(nameof(TopLevelDialog))
@@ -40,6 +43,7 @@ namespace GraphApiTestBot.Dialogs
             InitialDialogId = nameof(WaterfallDialog);
         }
 
+        // Waterfall Step 1
         private async Task<DialogTurnResult> OpenActionChooserAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.PromptAsync(nameof(ChoicePrompt),
@@ -51,12 +55,13 @@ namespace GraphApiTestBot.Dialogs
                 }, cancellationToken);
         }
 
+        // Waterfall Step 2
         private async Task<DialogTurnResult> OpenSignInDialogAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var command = ((FoundChoice)stepContext.Result).Value;
             stepContext.Values["command"] = command;
 
-            if (!SignInRequiredCommands.Contains(command))
+            if (!_signInRequiredCommands.Contains(command))
             {
                 return await stepContext.ContinueDialogAsync(cancellationToken: cancellationToken);
             }
@@ -64,10 +69,11 @@ namespace GraphApiTestBot.Dialogs
             return await stepContext.BeginDialogAsync(nameof(SignInDialog), null, cancellationToken);
         }
 
+        // Waterfall Step 3
         private async Task<DialogTurnResult> HandleSignInResultAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var command = (string) stepContext.Values["command"];
-            if (SignInRequiredCommands.Contains(command))
+            if (_signInRequiredCommands.Contains(command))
             {
                 var accessTokenState = (TokenState)stepContext.Result;
                 stepContext.Values["accessToken"] = accessTokenState;
@@ -76,6 +82,7 @@ namespace GraphApiTestBot.Dialogs
             return await stepContext.NextAsync(command, cancellationToken: cancellationToken);
         }
 
+        // Waterfall Step 4
         private async Task<DialogTurnResult> ExecuteChosenActionAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var message = (string)stepContext.Result;
@@ -104,23 +111,32 @@ namespace GraphApiTestBot.Dialogs
 
         private async Task ShowHelpCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            await stepContext.Context.SendActivityAsync("Help information here...", cancellationToken: cancellationToken);
+            await Cards.ShowActivityWithAttachmentsAsync(
+                stepContext.Context, 
+                Cards.BuildHelpAttachmentList(),
+                cancellationToken: cancellationToken);
         }
 
         private async Task LoadAndShowProfileInfoAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var tokenState = (TokenState)stepContext.Values["accessToken"];
+            var currentUser = await GraphApiHelper.GetCurrentUserAsync(tokenState, cancellationToken);
 
-            await OAuthHelpers.ShowMyProfileInfoAsync(stepContext.Context, tokenState, cancellationToken);
+            await stepContext.Context.SendActivityAsync($"You are {currentUser.DisplayName}.", cancellationToken: cancellationToken);
         }
 
         private async Task LoadAndShowOneDriveItemsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var tokenState = (TokenState)stepContext.Values["accessToken"];
+            var oneDriveItems = await GraphApiHelper.GetOneDriveFilesListAsync(tokenState, cancellationToken);
 
-            await OAuthHelpers.ShowFilesAsync(stepContext.Context, tokenState, cancellationToken);
+            await Cards.ShowActivityWithAttachmentsAsync(
+                stepContext.Context,
+                Cards.BuildOneDriveAttachmentList(oneDriveItems),
+                cancellationToken: cancellationToken);
         }
 
+        // Waterfall Step 5
         private async Task<DialogTurnResult> AskSomethingMoreAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.PromptAsync(nameof(ConfirmPrompt),
@@ -130,6 +146,7 @@ namespace GraphApiTestBot.Dialogs
                 }, cancellationToken);
         }
 
+        // Waterfall Step 6
         private async Task<DialogTurnResult> HandleSomethingMoreQuestingAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var repeatDialog = (bool)stepContext.Result;

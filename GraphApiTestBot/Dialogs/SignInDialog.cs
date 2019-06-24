@@ -22,7 +22,6 @@ namespace GraphApiTestBot.Dialogs
                     Text = "Please login",
                     Title = "Login",
                     Timeout = 300000, // User has 5 minutes to login
-                    // Timeout = 20000, // User has 20 sec to login
                 }));
 
             AddDialog(new TextPrompt(nameof(TextPrompt)));
@@ -38,12 +37,14 @@ namespace GraphApiTestBot.Dialogs
 
         public string ConnectionName { get; }
 
+        // Waterfall Step 1
         private async Task<DialogTurnResult> ShowSignInCardAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
             return await stepContext.BeginDialogAsync(nameof(OAuthPrompt), null, cancellationToken);
         }
 
+        // Waterfall Step 2
         private async Task<DialogTurnResult> ValidateSignInResultAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.5",
+  "version": "1.0.2",
+  "id": "7ae763b4-5353-4db7-81c9-671fae8254e2",
+  "packageName": "com.boryscherkas.onedriveviewerbot",
+  "devicePermissions": [ "geolocation", "media" ],
+  "developer": {
+    "name": "Borys Cherkas",
+    "websiteUrl": "https://github.com/borys-cherkas/",
+    "privacyUrl": "https://website.com/privacy",
+    "termsOfUseUrl": "https://website.com/app-tos"
+  },
+  "localizationInfo": {
+    "defaultLanguageTag": "en-us"
+  },
+  "name": {
+    "short": "OneDrive files viewer bot"
+  },
+  "description": {
+    "short": "The app which allows you to view all files in your OneDrive.",
+    "full": "Full description of your app"
+  },
+  "icons": {
+    "outline": "icon-32x32.png",
+    "color": "icon-192x192.png"
+  },
+  "accentColor": "#4464ee",
+  "bots": [
+    {
+      "botId": "7ae763b4-5353-4db7-81c9-671fae8254e2",
+      "needsChannelSelector": false,
+      "isNotificationOnly": false,
+      "scopes": [ "personal" ],
+      "supportsFiles": false,
+      "commandLists": [
+        {
+          "scopes": [ "personal" ],
+          "commands": [
+            {
+              "title": "Help",
+              "description": "Shows all available commands in bot"
+            },
+            {
+              "title": "List my files",
+              "description": "Shows all files in your OneDrive"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "token.botframework.com"
+  ]
+}

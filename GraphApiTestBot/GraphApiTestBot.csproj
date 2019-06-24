@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TeamsPublish\**" />
+    <Content Remove="TeamsPublish\**" />
+    <EmbeddedResource Remove="TeamsPublish\**" />
+    <None Remove="TeamsPublish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Bot.Builder.Azure" Version="4.4.5" />
     <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.4.5" />

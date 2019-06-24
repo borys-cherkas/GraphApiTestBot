@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,15 +31,24 @@ namespace GraphApiTestBot.Extensions
             return me;
         }
 
-        public async Task<IDriveItemChildrenCollectionPage> GetMicrosoftGraphOneDriveFilesAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async Task<ICollection<DriveItem>> GetMicrosoftGraphOneDriveFilesAsync(
+            CancellationToken cancellationToken = new CancellationToken())
         {
-            var graphClient = GetAuthenticatedClient();
+            List<DriveItem> driveItems = new List<DriveItem>();
 
-            var driveResponse = await graphClient.Me.Drive.Root.Children
+            var graphClient = GetAuthenticatedClient();
+            var pageDriveResponse = await graphClient.Me.Drive.Root.Children
                 .Request()
                 .GetAsync(cancellationToken);
+            driveItems.AddRange(pageDriveResponse.CurrentPage);
 
-            return driveResponse;
+            while (pageDriveResponse.NextPageRequest != null)
+            {
+                pageDriveResponse = await pageDriveResponse.NextPageRequest.GetAsync(cancellationToken);
+                driveItems.AddRange(pageDriveResponse.CurrentPage);
+            } 
+
+            return driveItems;
         }
 
         // Get an Authenticated Microsoft Graph client using the token issued to the user.

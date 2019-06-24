@@ -1,0 +1,28 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.0",
+  "type": "AdaptiveCard",
+  "text": "Help Command Overview",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Command: Help",
+      "spacing": "large",
+      "weight": "bolder",
+      "size": "large",
+      "isSubtle": false
+    },
+    {
+      "type": "TextBlock",
+      "text": "The intention of this command is to see all available commands of the bot.",
+      "separator": true,
+      "maxLines": 3,
+      "spacing": "medium",
+      "size": "medium",
+      "wrap": true
+    }
+  ]
+}

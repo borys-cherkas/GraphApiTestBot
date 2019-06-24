@@ -1,0 +1,28 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.0",
+  "type": "AdaptiveCard",
+  "text": "List All Files Command Overview",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Command: See OneDrive files",
+      "spacing": "large",
+      "weight": "bolder",
+      "size": "large",
+      "isSubtle": false
+    },
+    {
+      "type": "TextBlock",
+      "text": "This command allows user to see all files in the root folder of his OneDrive.",
+      "separator": true,
+      "spacing": "medium",
+      "maxLines": 3,
+      "size": "medium",
+      "wrap": true 
+    }
+  ]
+}
