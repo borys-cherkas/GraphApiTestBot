@@ -52,17 +52,17 @@ namespace GraphApiTestBot.CardsTemplates
 
         private static Attachment CreateAttachmentFromOneDriveItem(DriveItem driveItem)
         {
-            var buttons = new List<CardAction>();
+            var buttons = new List<CardAction>
+            {
+                new CardAction(ActionTypes.OpenUrl, "Open", value: driveItem.WebUrl)
+            };
 
             const string downloadUrlKey = "@microsoft.graph.downloadUrl";
             if (driveItem.AdditionalData != null && driveItem.AdditionalData.ContainsKey(downloadUrlKey))
             {
                 var value = (string)driveItem.AdditionalData[downloadUrlKey];
-                buttons.Add(new CardAction(ActionTypes.DownloadFile, "Download", value: value));
+                buttons.Add(new CardAction(ActionTypes.OpenUrl, "Download", value: value));
             }
-
-            var openFileButton = new CardAction(ActionTypes.OpenUrl, "Open", value: driveItem.WebUrl);
-            buttons.Add(openFileButton);
 
             var card = new HeroCard
             {
