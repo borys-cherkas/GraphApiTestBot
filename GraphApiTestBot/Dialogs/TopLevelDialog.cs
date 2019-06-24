@@ -132,17 +132,28 @@ namespace GraphApiTestBot.Dialogs
             var tokenState = (TokenState)stepContext.Values["accessToken"];
             var oneDriveItems = await GraphApiHelper.GetOneDriveFilesListAsync(tokenState, cancellationToken);
 
+            const string downloadUrlKey = "@microsoft.graph.downloadUrl";
             for (int i = 0; i < 3; i++)
             {
                 var driveItem = oneDriveItems.ToList()[i];
-                var itemJson = JsonConvert.SerializeObject(driveItem);
-                await stepContext.Context.SendActivityAsync(itemJson, cancellationToken: cancellationToken);
+                await stepContext.Context.SendActivityAsync($"{i}: driveItem.AdditionalData != null = {driveItem.AdditionalData != null}.", cancellationToken: cancellationToken);
+                
+                if (driveItem.AdditionalData != null)
+                {
+                    await stepContext.Context.SendActivityAsync($"{i}: driveItem.AdditionalData.ContainsKey(downloadUrlKey) = {driveItem.AdditionalData.ContainsKey(downloadUrlKey)}.", cancellationToken: cancellationToken);
+
+                    foreach (var kv in driveItem.AdditionalData)
+                    {
+                        await stepContext.Context.SendActivityAsync($"{i}: key = {kv.Key}, value = {kv.Value}.", cancellationToken: cancellationToken);
+                    }
+                }
+
             }
 
             await Cards.ShowActivityWithAttachmentsAsync(
-                stepContext.Context,
-                Cards.BuildOneDriveAttachmentList(oneDriveItems),
-                cancellationToken: cancellationToken);
+                    stepContext.Context,
+                    Cards.BuildOneDriveAttachmentList(oneDriveItems),
+                    cancellationToken: cancellationToken);
         }
 
         // Waterfall Step 5
