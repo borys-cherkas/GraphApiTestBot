@@ -32,7 +32,7 @@
       "needsChannelSelector": false,
       "isNotificationOnly": false,
       "scopes": [ "personal" ],
-      "supportsFiles": false,
+      "supportsFiles": true,
       "commandLists": [
         {
           "scopes": [ "personal" ],
@@ -42,7 +42,7 @@
               "description": "Shows all available commands in bot"
             },
             {
-              "title": "List my files",
+              "title": "List my items",
               "description": "Shows all files in your OneDrive"
             }
           ]
@@ -55,6 +55,7 @@
     "messageTeamMembers"
   ],
   "validDomains": [
-    "token.botframework.com"
+    "token.botframework.com",
+    "*.sharepoint.com"
   ]
 }
