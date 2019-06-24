@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphApiTestBot.CardsTemplates;
@@ -11,6 +12,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace GraphApiTestBot.Dialogs
 {
@@ -129,6 +131,13 @@ namespace GraphApiTestBot.Dialogs
         {
             var tokenState = (TokenState)stepContext.Values["accessToken"];
             var oneDriveItems = await GraphApiHelper.GetOneDriveFilesListAsync(tokenState, cancellationToken);
+
+            for (int i = 0; i < 3; i++)
+            {
+                var driveItem = oneDriveItems.ToList()[i];
+                var itemJson = JsonConvert.SerializeObject(driveItem);
+                await stepContext.Context.SendActivityAsync(itemJson, cancellationToken: cancellationToken);
+            }
 
             await Cards.ShowActivityWithAttachmentsAsync(
                 stepContext.Context,

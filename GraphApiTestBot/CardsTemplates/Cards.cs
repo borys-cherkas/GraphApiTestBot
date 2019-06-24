@@ -84,7 +84,7 @@ namespace GraphApiTestBot.CardsTemplates
         private static Attachment CreateHelpCommandOverviewAdaptiveCardAttachment()
         {
             // combine path for cross platform support
-            string[] paths = { ".", "AdaptiveCardsTemplates", "helpCommandDescriptionCard.json" };
+            string[] paths = { ".", nameof(CardsTemplates), "helpCommandDescriptionCard.json" };
 
             return CreateAdaptiveCardAttachment(paths);
         }
@@ -92,7 +92,7 @@ namespace GraphApiTestBot.CardsTemplates
         private static Attachment CreateListAllFilesCommandOverviewAdaptiveCardAttachment()
         {
             // combine path for cross platform support
-            string[] paths = { ".", "AdaptiveCardsTemplates", "listAllFilesCommandDescriptionCard.json" };
+            string[] paths = { ".", nameof(CardsTemplates), "listAllFilesCommandDescriptionCard.json" };
 
             return CreateAdaptiveCardAttachment(paths);
         }

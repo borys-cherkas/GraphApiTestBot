@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
   "manifestVersion": "1.5",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "id": "7ae763b4-5353-4db7-81c9-671fae8254e2",
   "packageName": "com.boryscherkas.onedriveviewerbot",
   "devicePermissions": [ "geolocation", "media" ],
@@ -25,7 +25,7 @@
     "outline": "icon-32x32.png",
     "color": "icon-192x192.png"
   },
-  "accentColor": "#4464ee",
+  "accentColor": "#6bc8ff",
   "bots": [
     {
       "botId": "7ae763b4-5353-4db7-81c9-671fae8254e2",
